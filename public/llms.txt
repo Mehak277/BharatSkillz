@@ -1,0 +1,14 @@
+# BharatSkillz
+
+> Modern EdTech and career platform offering cohort-based courses, internships, mentorship, and placement assistance for Indian learners.
+
+## Pages
+
+- [Home](/): Overview of programs, mentors, and outcomes.
+- [Courses](/courses): Browse all cohort-based courses with pricing and curriculum.
+- [Internships](/internships): Marketplace of internship opportunities for students.
+- [Career Tracks](/career-tracks): Guided roadmaps from beginner to job-ready.
+- [Mentors](/mentors): 1:1 mentors from top product companies.
+- [Success Stories](/success-stories): Learner outcomes and placements.
+- [Blog](/blog): Articles on careers, skills, and tech.
+- [Contact](/contact): Get in touch with the BharatSkillz team.

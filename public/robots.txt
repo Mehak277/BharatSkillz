@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://talent-forge-x.lovable.app/sitemap.xml
