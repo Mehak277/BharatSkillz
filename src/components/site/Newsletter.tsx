@@ -1,9 +1,74 @@
+import { useState } from "react";
 import { Mail, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getFirebaseFirestore } from "@/lib/firebase/config";
+import { doc, setDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 export function Newsletter() {
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const email = String(fd.get("email") ?? "").trim().toLowerCase();
+    if (!email) return;
+
+    setSubmitting(true);
+    try {
+      const db = getFirebaseFirestore();
+      
+      // 1. Add to subscribers collection
+      await setDoc(doc(db, "subscribers", email), {
+        email,
+        subscribedAt: serverTimestamp(),
+        status: "active",
+      });
+
+      // 2. Add to mail collection (for Firebase Trigger Email extension)
+      await addDoc(collection(db, "mail"), {
+        to: email,
+        message: {
+          subject: "Welcome to BharatSkillz! 🚀",
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b;">
+              <p>Hi,</p>
+              <br/>
+              <p>Thank you for subscribing to BharatSkillz!</p>
+              <br/>
+              <p>We're excited to have you with us.</p>
+              <br/>
+              <p>Here's what you can expect:</p>
+              <ul style="margin-top: 8px; margin-bottom: 24px; padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Latest updates and news</li>
+                <li style="margin-bottom: 8px;">Exclusive offers and promotions</li>
+                <li style="margin-bottom: 8px;">Helpful tips and resources</li>
+              </ul>
+              <br/>
+              <p>If you subscribed by mistake, you can unsubscribe anytime using the link at the bottom of our emails.</p>
+              <br/>
+              <p>Stay tuned!</p>
+            </div>
+          `
+        }
+      });
+
+      toast.success("Subscribed successfully!", {
+        description: `We have sent a welcome email to ${email}.`,
+      });
+      form.reset();
+    } catch (err: any) {
+      console.error("Error subscribing to newsletter:", err);
+      toast.error("Failed to subscribe. Please try again.", {
+        description: err?.message || "Unknown error",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <section className="border-t border-border bg-gradient-to-br from-mint via-background to-peach">
       <div className="container-page py-20">
@@ -21,17 +86,7 @@ export function Newsletter() {
               </p>
             </div>
 
-            <form
-              className="flex flex-col gap-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                const email = String(fd.get("email") ?? "").trim();
-                if (!email) return;
-                toast.success("Subscribed!", { description: `We'll send updates to ${email}.` });
-                e.currentTarget.reset();
-              }}
-            >
+            <form className="flex flex-col gap-4" onSubmit={onSubmit}>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -42,8 +97,8 @@ export function Newsletter() {
                   className="h-14 bg-background pl-12 text-base"
                 />
               </div>
-              <Button type="submit" size="lg" className="h-14 text-base">
-                Subscribe for free
+              <Button type="submit" size="lg" className="h-14 text-base" disabled={submitting}>
+                {submitting ? "Subscribing..." : "Subscribe for free"}
               </Button>
               <p className="text-xs text-muted-foreground">
                 By subscribing, you agree to receive emails from us.

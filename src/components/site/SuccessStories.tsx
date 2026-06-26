@@ -6,6 +6,11 @@ import aarav from "@/assets/students/aarav.jpg";
 import ishita from "@/assets/students/ishita.jpg";
 import mohit from "@/assets/students/mohit.jpg";
 import neha from "@/assets/students/neha.jpg";
+import m1 from "@/assets/mentors/m1.jpg";
+import m2 from "@/assets/mentors/m2.jpg";
+import m3 from "@/assets/mentors/m3.jpg";
+import m4 from "@/assets/mentors/m4.jpg";
+import m5 from "@/assets/mentors/m5.jpg";
 
 const toneBg: Record<Testimonial["tone"], string> = {
   mint: "bg-mint",
@@ -19,6 +24,11 @@ const photos: Record<string, string> = {
   t2: ishita,
   t3: mohit,
   t4: neha,
+  t5: m1,
+  t6: m2,
+  t7: m3,
+  t8: m4,
+  t9: m5,
 };
 
 function MarqueeColumn({

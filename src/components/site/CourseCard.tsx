@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Award, Clock, Star, Users } from "lucide-react";
-import type { Course } from "@/lib/data/courses";
+import type { CourseDoc } from "@/lib/firebase/courses";
 import { Button } from "@/components/ui/button";
 import { EnrollDialog } from "./EnrollDialog";
 
-export function CourseCard({ course }: { course: Course }) {
+export function CourseCard({ course }: { course: CourseDoc }) {
   return (
     <article className="group glass-card lift-card flex h-full flex-col overflow-hidden rounded-3xl">
       <Link
@@ -13,7 +13,7 @@ export function CourseCard({ course }: { course: Course }) {
         className="relative block aspect-[16/10] overflow-hidden bg-muted"
       >
         <img
-          src={course.image}
+          src={course.image || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=3540&auto=format&fit=crop"}
           alt={course.title}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-110"

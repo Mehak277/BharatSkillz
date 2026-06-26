@@ -85,6 +85,16 @@ function ProfilePage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    
+    // Strict 10-digit phone number validation
+    const phoneRegex = /^\d{10}$/;
+    if (form.phone && !phoneRegex.test(form.phone.trim())) {
+      toast.error("Invalid phone number", {
+        description: "Phone number must be exactly 10 digits.",
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       await updateUserProfile(user.uid, {

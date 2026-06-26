@@ -1,11 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Building2, Clock, IndianRupee, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { INTERNSHIPS } from "@/lib/data/internships";
+import { useInternships } from "@/lib/firebase/internships";
 import { SectionHeading } from "./SectionHeading";
 import { Reveal } from "./Reveal";
 
 export function InternshipMarketplace() {
+  const { internships: dbInternships = [], loading } = useInternships();
+  const approvedInternships = dbInternships.filter(i => i.status === "Approved");
+
   return (
     <section className="section-y bg-secondary/40">
       <div className="container-page">
@@ -24,18 +27,25 @@ export function InternshipMarketplace() {
           </div>
         </Reveal>
 
-        <Reveal className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3" stagger={0.07}>
-          {INTERNSHIPS.slice(0, 6).map((i) => (
-            <article
-              key={i.id}
+        {loading ? (
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="glass-card animate-pulse h-64 rounded-3xl bg-secondary/30" />
+            ))}
+          </div>
+        ) : (
+          <Reveal className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3" stagger={0.07}>
+            {approvedInternships.slice(0, 6).map((i) => (
+              <article
+                key={i.id}
               data-reveal
               className="glass-card lift-card flex flex-col rounded-3xl p-6"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
                   {i.logo ? (
-                    <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-background ring-1 ring-border">
-                      <img src={i.logo} alt={`${i.company} logo`} className="h-full w-full object-cover" />
+                    <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden">
+                      <img src={i.logo} alt={`${i.company} logo`} className="h-full w-full object-contain" />
                     </span>
                   ) : (
                     <span
@@ -78,6 +88,7 @@ export function InternshipMarketplace() {
             </article>
           ))}
         </Reveal>
+        )}
 
         <div className="mt-10 flex justify-center">
           <Button asChild variant="outline" className="bg-background">

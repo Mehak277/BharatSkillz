@@ -8,7 +8,7 @@ const cols = [
     links: [
       { label: "All Courses", to: "/courses" },
       { label: "Career Tracks", to: "/career-tracks" },
-      { label: "Blog", to: "/blog" },
+      { label: "Blog", to: "/resources/blog" },
     ],
   },
   {

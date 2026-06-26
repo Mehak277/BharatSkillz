@@ -3,6 +3,8 @@ import { Play, Clock, CheckCircle2, Inbox } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserEnrollments } from "@/lib/firebase/users";
 import { Button } from "@/components/ui/button";
+import { useCourses } from "@/lib/firebase/courses";
+import { CourseLearningDialog } from "@/components/site/CourseLearningDialog";
 
 export const Route = createFileRoute("/dashboard/courses")({
   component: MyCourses,
@@ -10,7 +12,11 @@ export const Route = createFileRoute("/dashboard/courses")({
 
 function MyCourses() {
   const { user } = useAuth();
-  const { enrollments, loading } = useUserEnrollments(user?.uid);
+  const { enrollments, loading: enrollmentsLoading } = useUserEnrollments(user?.uid);
+  const { courses: dbCourses, loading: coursesLoading } = useCourses();
+
+  const activeEnrollments = enrollments.filter(e => dbCourses.some(c => c.slug === e.slug));
+  const loading = enrollmentsLoading || coursesLoading;
 
   if (loading) {
     return (
@@ -23,7 +29,7 @@ function MyCourses() {
     );
   }
 
-  if (enrollments.length === 0) {
+  if (activeEnrollments.length === 0) {
     return (
       <div className="space-y-6">
         <div>
@@ -51,17 +57,23 @@ function MyCourses() {
       <div>
         <h2 className="font-display text-2xl font-extrabold">My Courses</h2>
         <p className="text-sm text-muted-foreground">
-          {enrollments.length} course{enrollments.length !== 1 ? "s" : ""} enrolled.
+          {activeEnrollments.length} course{activeEnrollments.length !== 1 ? "s" : ""} enrolled.
         </p>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {enrollments.map((c) => {
+        {activeEnrollments.map((c) => {
           const done = c.progress === 100;
+          const courseData = dbCourses.find((item) => item.slug === c.slug);
+          const courseImage = courseData?.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60";
           return (
-            <article key={c.slug} className="glass-card lift-card flex flex-col overflow-hidden rounded-2xl">
-              <div className="relative grid h-32 place-items-center bg-gradient-to-br from-peach/25 via-background to-peach/10 text-5xl">
-                {c.thumbnail}
+            <article key={c.slug} className="glass-card lift-card flex h-full flex-col overflow-hidden rounded-3xl">
+              <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+                <img
+                  src={courseImage}
+                  alt={c.title}
+                  className="h-full w-full object-cover"
+                />
                 {done && (
                   <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold text-primary-foreground shadow">
                     <CheckCircle2 className="h-3 w-3" /> Completed
@@ -69,8 +81,8 @@ function MyCourses() {
                 )}
               </div>
               <div className="flex flex-1 flex-col p-5">
-                <h3 className="font-display text-lg font-bold leading-tight">{c.title}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">By {c.instructor}</p>
+                <h3 className="font-display text-lg font-bold leading-tight">{courseData?.title || c.title}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">By {courseData?.instructor?.name || c.instructor}</p>
 
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-between text-xs">
@@ -95,10 +107,18 @@ function MyCourses() {
                   </p>
                 )}
 
-                <Button className="mt-5 w-full" variant={done ? "outline" : "default"}>
-                  <Play className="h-3.5 w-3.5" />
-                  {done ? "Review course" : "Continue learning"}
-                </Button>
+                <div className="mt-auto pt-5">
+                  <CourseLearningDialog 
+                    enrollment={c}
+                    courseData={courseData}
+                    trigger={
+                      <Button className="w-full" variant={done ? "outline" : "default"}>
+                        <Play className="h-3.5 w-3.5" />
+                        {done ? "Review course" : "Continue learning"}
+                      </Button>
+                    }
+                  />
+                </div>
               </div>
             </article>
           );

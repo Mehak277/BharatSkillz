@@ -233,3 +233,14 @@ export const COURSES: Course[] = [
 
 export const getCourseBySlug = (slug: string) =>
   COURSES.find((c) => c.slug === slug);
+
+export const getCourseImage = (slug: string, dbImage?: string) => {
+  if (dbImage && !dbImage.includes("unsplash.com")) return dbImage;
+  
+  const localCourse = COURSES.find((c) => c.slug === slug);
+  if (localCourse?.image) return localCourse.image;
+  
+  const images = Object.values(LEARN_IMAGES);
+  const hash = Math.abs(slug.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0));
+  return images[hash % images.length];
+};

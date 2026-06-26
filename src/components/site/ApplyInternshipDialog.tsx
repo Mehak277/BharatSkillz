@@ -13,18 +13,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { CourseDoc } from "@/lib/firebase/courses";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/lib/firebase/users";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getFirebaseFirestore } from "@/lib/firebase/config";
+import type { InternshipDoc } from "@/lib/firebase/internships";
 import { Link } from "@tanstack/react-router";
 
-export function EnrollDialog({
-  course,
+export function ApplyInternshipDialog({
+  internship,
   trigger,
 }: {
-  course: CourseDoc;
+  internship: InternshipDoc;
   trigger: ReactNode;
 }) {
   const { user } = useAuth();
@@ -35,12 +35,21 @@ export function EnrollDialog({
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!user) {
+      toast.error("Please login to apply for internships");
+      return;
+    }
+
     const form = new FormData(e.currentTarget);
     const name = String(form.get("name") ?? "").trim();
     const email = String(form.get("email") ?? "").trim();
     const phone = String(form.get("phone") ?? "").trim();
+    const resumeFile = form.get("resume") as File | null;
+    const resume = resumeFile?.name ? resumeFile.name : "";
+
     if (!name || !email || !phone) {
-      toast.error("Please fill in all fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -51,31 +60,38 @@ export function EnrollDialog({
       });
       return;
     }
+
     setSubmitting(true);
     try {
-      if (user) {
-        const db = getFirebaseFirestore();
-        const docRef = doc(db, "users", user.uid, "enrollments", course.slug);
-        await setDoc(docRef, {
-          title: course.title,
-          instructor: course.instructor?.name || "BharatSkillz Expert",
-          thumbnail: course.emoji || "📚",
-          progress: 0,
-          nextLesson: "Lesson 1: Introduction",
-          totalLessons: course.lessons || 10,
-          completedLessons: 0,
-          enrolledAt: serverTimestamp(),
-        });
-      } else {
-        await new Promise((r) => setTimeout(r, 700));
-      }
-      setDone(true);
-      toast.success(`Enrollment received for ${course.title}`, {
-        description: "Our team will reach out within 24 hours.",
+      const db = getFirebaseFirestore();
+      const docRef = doc(db, "applications", `${user.uid}_${internship.id}`);
+      
+      const formattedDate = new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       });
+
+      await setDoc(docRef, {
+        userId: user.uid,
+        internshipId: internship.id,
+        role: internship.role,
+        company: internship.company,
+        status: "Applied",
+        appliedOn: formattedDate,
+        location: internship.location,
+        stipend: internship.stipend,
+        appliedAt: serverTimestamp(),
+        applicantName: name,
+        applicantPhone: phone,
+        resumeLink: resume || "",
+      });
+
+      setDone(true);
+      toast.success(`Applied successfully for ${internship.role}`);
     } catch (err: any) {
-      console.error("Error saving enrollment to Firestore:", err);
-      toast.error("Failed to enroll. Please try again.");
+      console.error("Error submitting application:", err);
+      toast.error("Failed to submit application. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -91,32 +107,11 @@ export function EnrollDialog({
     >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
-        {done ? (
-          <div className="py-6 text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary-soft">
-              <CheckCircle2 className="h-7 w-7 text-primary" />
-            </div>
-            <h3 className="mt-4 text-xl font-bold">You're in!</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              We've received your interest in <strong>{course.title}</strong>.
-              A program advisor will call you shortly.
-            </p>
-            <div className="mt-6 flex flex-col gap-2">
-              {user && (
-                <Button asChild onClick={() => setOpen(false)}>
-                  <Link to="/dashboard/courses">Go to Dashboard</Link>
-                </Button>
-              )}
-              <Button variant="outline" className="w-full" onClick={() => setOpen(false)}>
-                Done
-              </Button>
-            </div>
-          </div>
-        ) : !user ? (
+        {!user ? (
           <div className="py-6 text-center">
             <h3 className="text-xl font-bold">Login Required</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Please login to enroll in <strong>{course.title}</strong>.
+              Please login to apply for <strong>{internship.role}</strong> at {internship.company}.
             </p>
             <div className="mt-6 flex flex-col gap-2">
               <Button asChild onClick={() => setOpen(false)}>
@@ -127,13 +122,31 @@ export function EnrollDialog({
               </Button>
             </div>
           </div>
+        ) : done ? (
+          <div className="py-6 text-center">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary-soft">
+              <CheckCircle2 className="h-7 w-7 text-primary" />
+            </div>
+            <h3 className="mt-4 text-xl font-bold">Application Sent!</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              You have applied for the <strong>{internship.role}</strong> role at {internship.company}.
+              You can track your application status in your dashboard.
+            </p>
+            <div className="mt-6 flex flex-col gap-2">
+              <Button asChild onClick={() => setOpen(false)}>
+                <Link to="/dashboard/internships">Go to Dashboard</Link>
+              </Button>
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Done
+              </Button>
+            </div>
+          </div>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Enroll in {course.title}</DialogTitle>
+              <DialogTitle>Apply for {internship.role}</DialogTitle>
               <DialogDescription>
-                Reserve your seat — fees ₹{course.price.toLocaleString("en-IN")}.
-                Our advisor will help with EMI & scholarships.
+                At {internship.company} · {internship.location} ({internship.mode})
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={onSubmit} className="space-y-4">
@@ -169,9 +182,19 @@ export function EnrollDialog({
                   required
                 />
               </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="resume">Resume Attachment</Label>
+                <Input
+                  id="resume"
+                  name="resume"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  required
+                />
+              </div>
               <DialogFooter>
                 <Button type="submit" className="w-full" disabled={submitting}>
-                  {submitting ? "Reserving seat…" : "Confirm Enrollment"}
+                  {submitting ? "Submitting application…" : "Submit Application"}
                 </Button>
               </DialogFooter>
             </form>

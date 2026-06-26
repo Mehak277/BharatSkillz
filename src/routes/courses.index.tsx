@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { COURSES } from "@/lib/data/courses";
+
 import { CourseCard } from "@/components/site/CourseCard";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { useCourses } from "@/lib/firebase/courses";
+import { useState, useMemo } from "react";
+import { SearchIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/courses/")({
   head: () => ({
@@ -24,36 +27,14 @@ export const Route = createFileRoute("/courses/")({
 
 function CoursesPage() {
   const { courses: dbCourses = [], loading } = useCourses();
+  const [search, setSearch] = useState("");
 
-  // Map Firestore CourseDoc to Course shape & merge with static COURSES
-  const allCourses = [
-    ...dbCourses.map((c) => ({
-      slug: c.slug,
-      title: c.title,
-      category: c.category,
-      level: (c.level as any) || "Beginner",
-      duration: c.duration || "3 months",
-      lessons: c.lessons || 10,
-      rating: c.rating || 4.5,
-      students: c.students || 0,
-      price: c.price || 0,
-      originalPrice: c.originalPrice || 0,
-      certificate: c.certificate ?? true,
-      tone: (c.category.toLowerCase().includes("data") ? "lavender" : c.category.toLowerCase().includes("design") ? "peach" : c.category.toLowerCase().includes("ai") ? "gold" : "mint") as "mint" | "peach" | "lavender" | "gold",
-      emoji: c.emoji || "📚",
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60",
-      short: c.short || "",
-      long: c.long || "",
-      outcomes: c.outcomes || [],
-      syllabus: [
-        { title: "Introduction", topics: ["Overview", "Setup", "Basics"] },
-        { title: "Deep Dive", topics: ["Intermediate concepts", "Practical projects"] },
-        { title: "Advanced Topics", topics: ["Deployment", "Best practices"] }
-      ],
-      instructor: { name: "BharatSkillz Expert", role: "Industry Mentor", company: "BharatSkillz Partner" }
-    })),
-    ...COURSES.filter((sc) => !dbCourses.some((c) => c.slug === sc.slug))
-  ];
+  const filteredCourses = useMemo(() => {
+    return dbCourses.filter(c => 
+      c.title.toLowerCase().includes(search.toLowerCase()) || 
+      c.category.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [dbCourses, search]);
 
   return (
     <div className="py-16 sm:py-20">
@@ -63,6 +44,19 @@ function CoursesPage() {
           title="Career-defining programs"
           description="Cohort-based and self-paced courses, built with hiring managers from India's top companies."
         />
+        
+        <div className="mt-8 flex justify-center">
+          <div className="relative w-full max-w-md">
+            <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search courses by title or category..." 
+              value={search} 
+              onChange={(e) => setSearch(e.target.value)} 
+              className="pl-10 bg-card border-border/60 shadow-sm" 
+            />
+          </div>
+        </div>
+
         {loading ? (
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
@@ -71,9 +65,14 @@ function CoursesPage() {
           </div>
         ) : (
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {allCourses.map((c) => (
+            {filteredCourses.map((c) => (
               <CourseCard key={c.slug} course={c} />
             ))}
+            {filteredCourses.length === 0 && (
+              <div className="col-span-full py-12 text-center text-muted-foreground">
+                No courses found matching your search.
+              </div>
+            )}
           </div>
         )}
       </div>

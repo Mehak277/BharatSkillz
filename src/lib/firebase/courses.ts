@@ -43,6 +43,10 @@ export interface CourseDoc {
   long: string;          // Long description for detail page
   outcomes: string[];    // Learning outcomes (array of strings)
   status: "active" | "draft"; // "active" = visible publicly
+  image: string;
+  instructor?: { name: string; role: string; company: string };
+  tone?: string;
+  youtubePlaylistUrl?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -69,6 +73,10 @@ function snapToDoc(docSnap: DocumentData & { id: string }): CourseDoc {
     long: d.long ?? "",
     outcomes: Array.isArray(d.outcomes) ? d.outcomes : [],
     status: d.status ?? "active",
+    image: d.image ?? "",
+    instructor: d.instructor || { name: "BharatSkillz Expert", role: "Instructor", company: "BharatSkillz" },
+    tone: d.tone ?? "mint",
+    youtubePlaylistUrl: d.youtubePlaylistUrl ?? "",
     createdAt: d.createdAt,
     updatedAt: d.updatedAt,
   };

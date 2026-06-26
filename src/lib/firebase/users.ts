@@ -18,6 +18,7 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  where,
   setDoc,
   getDoc,
   DocumentData,
@@ -55,11 +56,14 @@ export interface CourseEnrollment {
   nextLesson: string;
   totalLessons: number;
   completedLessons: number;
+  completedLessonIndices?: number[];
   enrolledAt?: FieldValue | unknown;
 }
 
 export interface InternshipApplication {
   id: string;
+  userId?: string;
+  internshipId?: string;
   role: string;
   company: string;
   status: "Applied" | "Shortlisted" | "Interview" | "Selected" | "Rejected";
@@ -215,6 +219,7 @@ export function useUserEnrollments(uid: string | undefined) {
           nextLesson: data.nextLesson ?? "",
           totalLessons: data.totalLessons ?? 0,
           completedLessons: data.completedLessons ?? 0,
+          completedLessonIndices: data.completedLessonIndices ?? [],
           enrolledAt: data.enrolledAt,
         };
       });
@@ -232,7 +237,7 @@ export function useUserEnrollments(uid: string | undefined) {
 
 // ─── Application Hooks ────────────────────────────────────────────────────────
 
-/** useUserApplications — real-time listener on users/{uid}/applications */
+/** useUserApplications — real-time listener on top-level applications collection */
 export function useUserApplications(uid: string | undefined) {
   const [applications, setApplications] = useState<InternshipApplication[]>([]);
   const [loading, setLoading] = useState(true);
@@ -253,8 +258,8 @@ export function useUserApplications(uid: string | undefined) {
     }
 
     const q = query(
-      collection(db, "users", uid, "applications"),
-      orderBy("appliedAt", "desc")
+      collection(db, "applications"),
+      where("userId", "==", uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -262,6 +267,8 @@ export function useUserApplications(uid: string | undefined) {
         const data = d.data();
         return {
           id: d.id,
+          userId: data.userId,
+          internshipId: data.internshipId,
           role: data.role ?? "",
           company: data.company ?? "",
           status: data.status ?? "Applied",
@@ -271,9 +278,16 @@ export function useUserApplications(uid: string | undefined) {
           appliedAt: data.appliedAt,
         };
       });
+      // Client-side sorting to avoid requiring a composite index in Firestore
+      docs.sort((a, b) => {
+        const timeA = (a.appliedAt as any)?.toMillis ? (a.appliedAt as any).toMillis() : 0;
+        const timeB = (b.appliedAt as any)?.toMillis ? (b.appliedAt as any).toMillis() : 0;
+        return timeB - timeA;
+      });
       setApplications(docs);
       setLoading(false);
-    }, () => {
+    }, (err) => {
+      console.error("Applications fetch error:", err);
       setLoading(false);
     });
 

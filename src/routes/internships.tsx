@@ -3,8 +3,8 @@ import { Building2, Clock, IndianRupee, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Reveal } from "@/components/site/Reveal";
-import { INTERNSHIPS } from "@/lib/data/internships";
 import { useInternships } from "@/lib/firebase/internships";
+import { ApplyInternshipDialog } from "@/components/site/ApplyInternshipDialog";
 
 export const Route = createFileRoute("/internships")({
   head: () => ({
@@ -23,25 +23,7 @@ export const Route = createFileRoute("/internships")({
 function InternshipsPage() {
   const { internships: dbInternships = [], loading } = useInternships();
 
-  const approvedDbInternships = dbInternships.filter((i) => i.status === "Approved");
-
-  // Merge Firestore approved listings with static listings
-  const allInternships = [
-    ...approvedDbInternships.map((i) => ({
-      id: i.id,
-      role: i.role,
-      company: i.company,
-      logoColor: i.logoColor || "#6366f1",
-      location: i.location || "Remote",
-      mode: (i.mode || "Remote") as "Remote" | "Hybrid" | "On-site",
-      duration: i.duration || "3 months",
-      stipend: i.stipend || "₹30,000/mo",
-      skills: i.skills || [],
-      postedDays: i.postedDays || 0,
-      openings: i.openings || 1,
-    })),
-    ...INTERNSHIPS.filter((sc) => !dbInternships.some((i) => i.role === sc.role && i.company === sc.company))
-  ];
+  const approvedInternships = dbInternships.filter((i) => i.status === "Approved");
 
   return (
     <>
@@ -65,7 +47,7 @@ function InternshipsPage() {
             </div>
           ) : (
             <Reveal className="grid gap-5 md:grid-cols-2 lg:grid-cols-3" stagger={0.06}>
-              {allInternships.map((i) => (
+              {approvedInternships.map((i) => (
                 <article
                   key={i.id}
                   data-reveal
@@ -74,12 +56,12 @@ function InternshipsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                       {(i as any).logo ? (
-                        <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-background ring-1 ring-border">
-                          <img src={(i as any).logo} alt={`${i.company} logo`} className="h-full w-full object-cover" />
+                        <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden">
+                          <img src={(i as any).logo} alt={`${i.company} logo`} className="h-full w-full object-contain" />
                         </span>
                       ) : (
                         <span
-                          className="grid h-11 w-11 shrink-0 place-items-center rounded-xl font-display text-sm font-bold text-white"
+                          className="grid h-12 w-12 shrink-0 place-items-center rounded-xl font-display text-sm font-bold text-white"
                           style={{ backgroundColor: i.logoColor }}
                         >
                           {i.company[0]}
@@ -112,9 +94,14 @@ function InternshipsPage() {
                     ))}
                   </div>
 
-                  <Button asChild className="btn-shine mt-5">
-                    <Link to="/contact">Apply Now</Link>
-                  </Button>
+                  <ApplyInternshipDialog
+                    internship={i}
+                    trigger={
+                      <Button className="btn-shine mt-5 w-full">
+                        Apply Now
+                      </Button>
+                    }
+                  />
                 </article>
               ))}
             </Reveal>

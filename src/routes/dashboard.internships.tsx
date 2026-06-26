@@ -110,7 +110,6 @@ function AppliedInternships() {
               >
                 {i.status}
               </span>
-              <Button size="sm" variant="outline">View details</Button>
             </div>
           </article>
         ))}

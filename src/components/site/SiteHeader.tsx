@@ -4,6 +4,8 @@ import { Menu, X, GraduationCap, BookOpen, BarChart3, FolderOpen, Briefcase, Ref
 import { NAV_LINKS, SITE } from "@/lib/data/site";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/lib/firebase/users";
 
 const RESOURCE_ITEMS = [
   {
@@ -58,7 +60,20 @@ const RESOURCE_ITEMS = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const { user } = useAuth();
+  const { profile } = useUserProfile(user?.uid);
+
+  const displayName = profile?.name || user?.displayName || user?.email?.split("@")[0] || "User";
+  const getInitials = (nameStr: string) => {
+    if (!nameStr) return "U";
+    return nameStr
+      .split(" ")
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+  };
+  const avatarInitials = getInitials(displayName);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
@@ -87,44 +102,39 @@ export function SiteHeader() {
           ))}
 
           {/* Resources Dropdown Trigger */}
-          <div
-            className="relative"
-            onMouseEnter={() => setShowDropdown(true)}
-            onMouseLeave={() => setShowDropdown(false)}
-          >
+          <div className="relative flex items-center h-full group">
             <button className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground inline-flex items-center gap-1 cursor-pointer">
               Resources
-              <ChevronDown className="h-3.5 w-3.5 opacity-55 transition-transform duration-200" style={{ transform: showDropdown ? 'rotate(180deg)' : 'none' }} />
+              <ChevronDown className="h-3.5 w-3.5 opacity-55 transition-transform duration-200 group-hover:rotate-180" />
             </button>
-            {showDropdown && (
-              <div className="absolute left-1/2 z-50 mt-2 w-[720px] -translate-x-1/2 rounded-3xl border border-border bg-card p-4 shadow-xl transition-all duration-200 animate-fade-in-up">
-                <div className="grid grid-cols-3 gap-3">
-                  {RESOURCE_ITEMS.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.href}
-                        to={item.href}
-                        onClick={() => setShowDropdown(false)}
-                        className="group flex flex-col justify-between rounded-2xl p-4 transition-all duration-200 hover:bg-secondary/60 border border-transparent hover:border-border/30"
-                      >
-                        <div>
-                          <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl font-bold", item.color)}>
-                            <Icon className="h-5 w-5" />
+            <div className="absolute left-1/2 top-full z-50 w-[720px] -translate-x-1/2 pt-4 transition-all duration-200 invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0">
+              <div className="rounded-3xl border border-border bg-card p-4 shadow-xl">
+                  <div className="grid grid-cols-3 gap-3">
+                    {RESOURCE_ITEMS.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.href}
+                          to={item.href}
+                          className="group flex flex-col justify-between rounded-2xl p-4 transition-all duration-200 hover:bg-secondary/60 border border-transparent hover:border-border/30"
+                        >
+                          <div>
+                            <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl font-bold", item.color)}>
+                              <Icon className="h-5 w-5" />
+                            </div>
+                            <h4 className="mt-3 font-semibold text-sm text-foreground">{item.title}</h4>
+                            <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">{item.description}</p>
                           </div>
-                          <h4 className="mt-3 font-semibold text-sm text-foreground">{item.title}</h4>
-                          <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">{item.description}</p>
-                        </div>
-                        <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-all duration-200">
-                          {item.linkText}
-                          <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                          <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-all duration-200">
+                            {item.linkText}
+                            <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            )}
           </div>
 
           {/* Remaining NAV_LINKS (from index 4 onwards) */}
@@ -140,14 +150,25 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/auth/login">Login</Link>
-          </Button>
-          <Button asChild size="sm" className="shadow-sm">
-            <Link to="/auth/signup">Get Started</Link>
-          </Button>
-        </div>
+        {user ? (
+          <div className="hidden items-center gap-3 md:flex">
+            <Button asChild size="sm" variant="outline">
+              <Link to="/dashboard">Go to Dashboard</Link>
+            </Button>
+            <Link to="/dashboard/profile" className="grid h-8 w-8 place-items-center rounded-full bg-peach/20 border border-peach/40 text-xs font-bold text-orange-foreground shrink-0 hover:bg-peach/30 transition-colors">
+              {avatarInitials}
+            </Link>
+          </div>
+        ) : (
+          <div className="hidden items-center gap-2 md:flex">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/auth/login">Login</Link>
+            </Button>
+            <Button asChild size="sm" className="shadow-sm">
+              <Link to="/auth/signup">Get Started</Link>
+            </Button>
+          </div>
+        )}
 
         <button
           type="button"
@@ -209,14 +230,25 @@ export function SiteHeader() {
             </Link>
           ))}
 
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/auth/login" onClick={() => setOpen(false)}>Login</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/auth/signup" onClick={() => setOpen(false)}>Get Started</Link>
-            </Button>
-          </div>
+          {user ? (
+            <div className="mt-3 flex flex-col gap-2">
+              <Button asChild size="sm" className="w-full">
+                <Link to="/dashboard" onClick={() => setOpen(false)}>Go to Dashboard</Link>
+              </Button>
+              <div className="flex items-center gap-2 px-3 py-1 text-sm text-muted-foreground justify-center">
+                <span>Logged in as <strong>{displayName}</strong></span>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/auth/login" onClick={() => setOpen(false)}>Login</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link to="/auth/signup" onClick={() => setOpen(false)}>Get Started</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>

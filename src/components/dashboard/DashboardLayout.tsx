@@ -1,5 +1,5 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   User,
@@ -51,6 +51,14 @@ export function DashboardLayout() {
   // Derive display values from real user data
   const displayName = profile?.name || user?.displayName || user?.email?.split("@")[0] || "User";
   const displayEmail = user?.email ?? "";
+
+  useEffect(() => {
+    if (profile?.status === "Suspended") {
+      signOut().then(() => {
+        navigate({ to: "/" });
+      });
+    }
+  }, [profile?.status, navigate]);
 
   const getInitials = (nameStr: string) => {
     if (!nameStr) return "U";

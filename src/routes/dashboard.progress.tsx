@@ -3,6 +3,7 @@ import { Flame, Clock, Target, TrendingUp, Inbox } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserEnrollments } from "@/lib/firebase/users";
 import { Button } from "@/components/ui/button";
+import { useCourses } from "@/lib/firebase/courses";
 
 export const Route = createFileRoute("/dashboard/progress")({
   component: ProgressPage,
@@ -21,16 +22,20 @@ const WEEKLY_HOURS = [
 
 function ProgressPage() {
   const { user } = useAuth();
-  const { enrollments, loading } = useUserEnrollments(user?.uid);
+  const { enrollments, loading: enrollLoading } = useUserEnrollments(user?.uid);
+  const { courses: dbCourses, loading: coursesLoading } = useCourses();
+
+  const activeEnrollments = enrollments.filter(e => dbCourses.some(c => c.slug === e.slug));
+  const loading = enrollLoading || coursesLoading;
 
   const overall =
-    enrollments.length > 0
+    activeEnrollments.length > 0
       ? Math.round(
-          enrollments.reduce((s, c) => s + c.progress, 0) / enrollments.length
+          activeEnrollments.reduce((s, c) => s + c.progress, 0) / activeEnrollments.length
         )
       : 0;
 
-  const completedCourses = enrollments.filter((c) => c.progress === 100).length;
+  const completedCourses = activeEnrollments.filter((c) => c.progress === 100).length;
 
   const kpis = [
     { label: "Hours this week", value: "0h", icon: Clock },
@@ -152,7 +157,7 @@ function ProgressPage() {
 
       <section className="glass-card rounded-2xl p-6">
         <h3 className="mb-4 text-base font-semibold">Course completion</h3>
-        {enrollments.length === 0 ? (
+        {activeEnrollments.length === 0 ? (
           <div className="flex flex-col items-center py-8 text-center">
             <Inbox className="h-8 w-8 text-muted-foreground/50 mb-2" />
             <p className="text-sm text-muted-foreground">No courses enrolled yet.</p>
@@ -162,23 +167,33 @@ function ProgressPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {enrollments.map((c) => (
-              <div key={c.slug}>
-                <div className="mb-1 flex items-center justify-between text-sm">
-                  <span className="font-medium">
-                    <span className="mr-2">{c.thumbnail}</span>
-                    {c.title}
-                  </span>
-                  <span className="text-xs font-bold text-foreground/90">{c.progress}%</span>
+            {activeEnrollments.map((c) => {
+              const courseData = dbCourses.find((item) => item.slug === c.slug);
+              const courseImage = courseData?.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60";
+              return (
+                <div key={c.slug}>
+                  <div className="mb-1 flex items-center justify-between text-sm">
+                    <span className="font-medium flex items-center gap-2">
+                      <div className="h-6 w-6 shrink-0 overflow-hidden rounded border border-border bg-muted">
+                        <img
+                          src={courseImage}
+                          alt={c.title}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      {c.title}
+                    </span>
+                    <span className="text-xs font-bold text-foreground/90">{c.progress}%</span>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-secondary">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-primary to-primary/80"
+                      style={{ width: `${c.progress}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-primary to-primary/80"
-                    style={{ width: `${c.progress}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

@@ -18,6 +18,8 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  where,
+  getDocs,
   DocumentData,
   QuerySnapshot,
 } from "firebase/firestore";
@@ -29,6 +31,7 @@ export interface InternshipDoc {
   id: string;           // Firestore document ID
   role: string;
   company: string;
+  logo?: string;        // Optional company logo URL
   logoColor: string;    // Hex color for fallback avatar
   location: string;
   mode: string;         // "Remote" | "Hybrid" | "On-site"
@@ -50,6 +53,7 @@ function snapToDoc(docSnap: DocumentData & { id: string }): InternshipDoc {
     id: docSnap.id,
     role: d.role ?? "",
     company: d.company ?? "",
+    logo: d.logo,
     logoColor: d.logoColor ?? "#6366f1",
     location: d.location ?? "Remote",
     mode: d.mode ?? "Remote",
@@ -139,8 +143,23 @@ export async function updateInternship(
   });
 }
 
-/** Delete an internship listing */
+/** Delete an internship listing and its associated applications */
 export async function deleteInternship(id: string): Promise<void> {
   const db = getFirebaseFirestore();
+  
+  // 1. Delete the internship document
   await deleteDoc(doc(db, "internships", id));
+
+  // 2. Delete all applications for this internship
+  const appsQuery = query(
+    collection(db, "applications"),
+    where("internshipId", "==", id)
+  );
+  
+  const snapshot = await getDocs(appsQuery);
+  const deletePromises = snapshot.docs.map((applicationDoc) => 
+    deleteDoc(doc(db, "applications", applicationDoc.id))
+  );
+  
+  await Promise.all(deletePromises);
 }

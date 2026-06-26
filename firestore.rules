@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Users collection ──────────────────────────────────────────
+    // Allow read/write for now to fix admin deletion issues.
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    // ── Courses collection ────────────────────────────────────────
+    // Anyone can read and write courses (for admin dashboard functionality).
+    match /courses/{courseId} {
+      allow read, write: if true;
+    }
+
+    // ── Internships collection ────────────────────────────────────
+    // Anyone can read and write internships.
+    match /internships/{internshipId} {
+      allow read, write: if true;
+    }
+
+    // ── Blogs collection ──────────────────────────────────────────
+    // Anyone can read and write blogs.
+    match /blogs/{blogId} {
+      allow read, write: if true;
+    }
+
+    // ── Enrollments collection ────────────────────────────────────
+    // Users can read/write their own enrollments.
+    match /enrollments/{enrollmentId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ── Certificates collection ───────────────────────────────────
+    match /certificates/{certId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ── Subscribers collection ────────────────────────────────────
+    // ANYONE (including unauthenticated) can subscribe to newsletter and delete.
+    match /subscribers/{email} {
+      allow read, write, delete: if true;
+    }
+
+    // ── Mail collection (Firebase Trigger Email) ──────────────────
+    // Allow anyone to create a mail document (triggers welcome email).
+    match /mail/{mailId} {
+      allow create: if true;
+      allow read: if request.auth != null;
+    }
+
+    // ── User sub-collections ──────────────────────────────────────
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── Applications Collection (Top-Level) ───────────────────────
+    match /applications/{applicationId} {
+      allow read, write: if true;
+    }
+
+    // ── Applications Collection Group (Admin) ─────────────────────
+    match /{path=**}/applications/{applicationId} {
+      allow read, write: if true;
+    }
+  }
+}

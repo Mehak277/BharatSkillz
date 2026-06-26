@@ -15,20 +15,18 @@ import { Route as MentorsRouteImport } from './routes/mentors'
 import { Route as InternshipsRouteImport } from './routes/internships'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CareerTracksRouteImport } from './routes/career-tracks'
-import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as CoursesIndexRouteImport } from './routes/courses.index'
+import { Route as CareerTracksIndexRouteImport } from './routes/career-tracks.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ResourcesUseCasesRouteImport } from './routes/resources.use-cases'
 import { Route as ResourcesGuidesRouteImport } from './routes/resources.guides'
 import { Route as ResourcesDirectoryRouteImport } from './routes/resources.directory'
 import { Route as ResourcesCompareRouteImport } from './routes/resources.compare'
 import { Route as ResourcesChangelogRouteImport } from './routes/resources.changelog'
-import { Route as ResourcesBlogRouteImport } from './routes/resources.blog'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardProgressRouteImport } from './routes/dashboard.progress'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
@@ -41,6 +39,8 @@ import { Route as CareerTracksSlugRouteImport } from './routes/career-tracks.$sl
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as ResourcesBlogIndexRouteImport } from './routes/resources.blog.index'
+import { Route as ResourcesBlogSlugRouteImport } from './routes/resources.blog.$slug'
 
 const SuccessStoriesRoute = SuccessStoriesRouteImport.update({
   id: '/success-stories',
@@ -72,16 +72,6 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CareerTracksRoute = CareerTracksRouteImport.update({
-  id: '/career-tracks',
-  path: '/career-tracks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -105,6 +95,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareerTracksIndexRoute = CareerTracksIndexRouteImport.update({
+  id: '/career-tracks/',
+  path: '/career-tracks/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -135,11 +130,6 @@ const ResourcesCompareRoute = ResourcesCompareRouteImport.update({
 const ResourcesChangelogRoute = ResourcesChangelogRouteImport.update({
   id: '/resources/changelog',
   path: '/resources/changelog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResourcesBlogRoute = ResourcesBlogRouteImport.update({
-  id: '/resources/blog',
-  path: '/resources/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
@@ -183,9 +173,9 @@ const CoursesSlugRoute = CoursesSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CareerTracksSlugRoute = CareerTracksSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => CareerTracksRoute,
+  id: '/career-tracks/$slug',
+  path: '/career-tracks/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
   id: '/signup',
@@ -202,13 +192,21 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AdminRoute,
 } as any)
+const ResourcesBlogIndexRoute = ResourcesBlogIndexRouteImport.update({
+  id: '/resources/blog/',
+  path: '/resources/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesBlogSlugRoute = ResourcesBlogSlugRouteImport.update({
+  id: '/resources/blog/$slug',
+  path: '/resources/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/blog': typeof BlogRoute
-  '/career-tracks': typeof CareerTracksRouteWithChildren
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/internships': typeof InternshipsRoute
@@ -227,21 +225,21 @@ export interface FileRoutesByFullPath {
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/progress': typeof DashboardProgressRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
-  '/resources/blog': typeof ResourcesBlogRoute
   '/resources/changelog': typeof ResourcesChangelogRoute
   '/resources/compare': typeof ResourcesCompareRoute
   '/resources/directory': typeof ResourcesDirectoryRoute
   '/resources/guides': typeof ResourcesGuidesRoute
   '/resources/use-cases': typeof ResourcesUseCasesRoute
   '/admin/': typeof AdminIndexRoute
+  '/career-tracks/': typeof CareerTracksIndexRoute
   '/courses/': typeof CoursesIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/resources/blog/$slug': typeof ResourcesBlogSlugRoute
+  '/resources/blog/': typeof ResourcesBlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/blog': typeof BlogRoute
-  '/career-tracks': typeof CareerTracksRouteWithChildren
   '/contact': typeof ContactRoute
   '/internships': typeof InternshipsRoute
   '/mentors': typeof MentorsRoute
@@ -259,23 +257,23 @@ export interface FileRoutesByTo {
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/progress': typeof DashboardProgressRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
-  '/resources/blog': typeof ResourcesBlogRoute
   '/resources/changelog': typeof ResourcesChangelogRoute
   '/resources/compare': typeof ResourcesCompareRoute
   '/resources/directory': typeof ResourcesDirectoryRoute
   '/resources/guides': typeof ResourcesGuidesRoute
   '/resources/use-cases': typeof ResourcesUseCasesRoute
   '/admin': typeof AdminIndexRoute
+  '/career-tracks': typeof CareerTracksIndexRoute
   '/courses': typeof CoursesIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/resources/blog/$slug': typeof ResourcesBlogSlugRoute
+  '/resources/blog': typeof ResourcesBlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/blog': typeof BlogRoute
-  '/career-tracks': typeof CareerTracksRouteWithChildren
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/internships': typeof InternshipsRoute
@@ -294,15 +292,17 @@ export interface FileRoutesById {
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/progress': typeof DashboardProgressRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
-  '/resources/blog': typeof ResourcesBlogRoute
   '/resources/changelog': typeof ResourcesChangelogRoute
   '/resources/compare': typeof ResourcesCompareRoute
   '/resources/directory': typeof ResourcesDirectoryRoute
   '/resources/guides': typeof ResourcesGuidesRoute
   '/resources/use-cases': typeof ResourcesUseCasesRoute
   '/admin/': typeof AdminIndexRoute
+  '/career-tracks/': typeof CareerTracksIndexRoute
   '/courses/': typeof CoursesIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/resources/blog/$slug': typeof ResourcesBlogSlugRoute
+  '/resources/blog/': typeof ResourcesBlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -310,8 +310,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
-    | '/blog'
-    | '/career-tracks'
     | '/contact'
     | '/dashboard'
     | '/internships'
@@ -330,21 +328,21 @@ export interface FileRouteTypes {
     | '/dashboard/profile'
     | '/dashboard/progress'
     | '/dashboard/settings'
-    | '/resources/blog'
     | '/resources/changelog'
     | '/resources/compare'
     | '/resources/directory'
     | '/resources/guides'
     | '/resources/use-cases'
     | '/admin/'
+    | '/career-tracks/'
     | '/courses/'
     | '/dashboard/'
+    | '/resources/blog/$slug'
+    | '/resources/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/blog'
-    | '/career-tracks'
     | '/contact'
     | '/internships'
     | '/mentors'
@@ -362,22 +360,22 @@ export interface FileRouteTypes {
     | '/dashboard/profile'
     | '/dashboard/progress'
     | '/dashboard/settings'
-    | '/resources/blog'
     | '/resources/changelog'
     | '/resources/compare'
     | '/resources/directory'
     | '/resources/guides'
     | '/resources/use-cases'
     | '/admin'
+    | '/career-tracks'
     | '/courses'
     | '/dashboard'
+    | '/resources/blog/$slug'
+    | '/resources/blog'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/auth'
-    | '/blog'
-    | '/career-tracks'
     | '/contact'
     | '/dashboard'
     | '/internships'
@@ -396,37 +394,40 @@ export interface FileRouteTypes {
     | '/dashboard/profile'
     | '/dashboard/progress'
     | '/dashboard/settings'
-    | '/resources/blog'
     | '/resources/changelog'
     | '/resources/compare'
     | '/resources/directory'
     | '/resources/guides'
     | '/resources/use-cases'
     | '/admin/'
+    | '/career-tracks/'
     | '/courses/'
     | '/dashboard/'
+    | '/resources/blog/$slug'
+    | '/resources/blog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
-  BlogRoute: typeof BlogRoute
-  CareerTracksRoute: typeof CareerTracksRouteWithChildren
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   InternshipsRoute: typeof InternshipsRoute
   MentorsRoute: typeof MentorsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuccessStoriesRoute: typeof SuccessStoriesRoute
+  CareerTracksSlugRoute: typeof CareerTracksSlugRoute
   CoursesSlugRoute: typeof CoursesSlugRoute
-  ResourcesBlogRoute: typeof ResourcesBlogRoute
   ResourcesChangelogRoute: typeof ResourcesChangelogRoute
   ResourcesCompareRoute: typeof ResourcesCompareRoute
   ResourcesDirectoryRoute: typeof ResourcesDirectoryRoute
   ResourcesGuidesRoute: typeof ResourcesGuidesRoute
   ResourcesUseCasesRoute: typeof ResourcesUseCasesRoute
+  CareerTracksIndexRoute: typeof CareerTracksIndexRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
+  ResourcesBlogSlugRoute: typeof ResourcesBlogSlugRoute
+  ResourcesBlogIndexRoute: typeof ResourcesBlogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -473,20 +474,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/career-tracks': {
-      id: '/career-tracks'
-      path: '/career-tracks'
-      fullPath: '/career-tracks'
-      preLoaderRoute: typeof CareerTracksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -520,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/courses'
       fullPath: '/courses/'
       preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/career-tracks/': {
+      id: '/career-tracks/'
+      path: '/career-tracks'
+      fullPath: '/career-tracks/'
+      preLoaderRoute: typeof CareerTracksIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -562,13 +556,6 @@ declare module '@tanstack/react-router' {
       path: '/resources/changelog'
       fullPath: '/resources/changelog'
       preLoaderRoute: typeof ResourcesChangelogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resources/blog': {
-      id: '/resources/blog'
-      path: '/resources/blog'
-      fullPath: '/resources/blog'
-      preLoaderRoute: typeof ResourcesBlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/settings': {
@@ -629,10 +616,10 @@ declare module '@tanstack/react-router' {
     }
     '/career-tracks/$slug': {
       id: '/career-tracks/$slug'
-      path: '/$slug'
+      path: '/career-tracks/$slug'
       fullPath: '/career-tracks/$slug'
       preLoaderRoute: typeof CareerTracksSlugRouteImport
-      parentRoute: typeof CareerTracksRoute
+      parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
       id: '/auth/signup'
@@ -654,6 +641,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/resources/blog/': {
+      id: '/resources/blog/'
+      path: '/resources/blog'
+      fullPath: '/resources/blog/'
+      preLoaderRoute: typeof ResourcesBlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources/blog/$slug': {
+      id: '/resources/blog/$slug'
+      path: '/resources/blog/$slug'
+      fullPath: '/resources/blog/$slug'
+      preLoaderRoute: typeof ResourcesBlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -681,18 +682,6 @@ const AuthRouteChildren: AuthRouteChildren = {
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
-interface CareerTracksRouteChildren {
-  CareerTracksSlugRoute: typeof CareerTracksSlugRoute
-}
-
-const CareerTracksRouteChildren: CareerTracksRouteChildren = {
-  CareerTracksSlugRoute: CareerTracksSlugRoute,
-}
-
-const CareerTracksRouteWithChildren = CareerTracksRoute._addFileChildren(
-  CareerTracksRouteChildren,
-)
 
 interface DashboardRouteChildren {
   DashboardCertificatesRoute: typeof DashboardCertificatesRoute
@@ -724,22 +713,23 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
-  BlogRoute: BlogRoute,
-  CareerTracksRoute: CareerTracksRouteWithChildren,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRouteWithChildren,
   InternshipsRoute: InternshipsRoute,
   MentorsRoute: MentorsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuccessStoriesRoute: SuccessStoriesRoute,
+  CareerTracksSlugRoute: CareerTracksSlugRoute,
   CoursesSlugRoute: CoursesSlugRoute,
-  ResourcesBlogRoute: ResourcesBlogRoute,
   ResourcesChangelogRoute: ResourcesChangelogRoute,
   ResourcesCompareRoute: ResourcesCompareRoute,
   ResourcesDirectoryRoute: ResourcesDirectoryRoute,
   ResourcesGuidesRoute: ResourcesGuidesRoute,
   ResourcesUseCasesRoute: ResourcesUseCasesRoute,
+  CareerTracksIndexRoute: CareerTracksIndexRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  ResourcesBlogSlugRoute: ResourcesBlogSlugRoute,
+  ResourcesBlogIndexRoute: ResourcesBlogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

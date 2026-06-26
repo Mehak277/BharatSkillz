@@ -15,6 +15,8 @@ import {
   Inbox,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCourses } from "@/lib/firebase/courses";
+import { CourseLearningDialog } from "@/components/site/CourseLearningDialog";
 
 export const Route = createFileRoute("/dashboard/")(  {
   component: DashboardHome,
@@ -25,8 +27,10 @@ function DashboardHome() {
   const { profile, loading: profileLoading } = useUserProfile(user?.uid);
   const { enrollments, loading: enrollmentsLoading } = useUserEnrollments(user?.uid);
   const { applications, loading: appsLoading } = useUserApplications(user?.uid);
+  const { courses: dbCourses, loading: coursesLoading } = useCourses();
 
-  const loading = profileLoading || enrollmentsLoading || appsLoading;
+  const activeEnrollments = enrollments.filter((e) => dbCourses.some((c) => c.slug === e.slug));
+  const loading = profileLoading || enrollmentsLoading || appsLoading || coursesLoading;
 
   if (loading) {
     return (
@@ -64,18 +68,18 @@ function DashboardHome() {
   };
   const joinedDate = getJoinedDate(profile?.createdAt);
 
-  const enrolled = enrollments.length;
-  const completed = enrollments.filter((c) => c.progress === 100).length;
+  const enrolled = activeEnrollments.length;
+  const completed = activeEnrollments.filter((c) => c.progress === 100).length;
   const inProgress = enrolled - completed;
   const applied = applications.length;
 
-  const continueCourses = enrollments.filter((c) => c.progress < 100).slice(0, 3);
+  const continueCourses = activeEnrollments.filter((c) => c.progress < 100).slice(0, 3);
 
   const stats = [
-    { label: "Enrolled Courses", value: enrolled, icon: BookOpen, tone: "from-emerald-400/20 to-teal-400/20" },
-    { label: "In Progress", value: inProgress, icon: Flame, tone: "from-amber-400/20 to-orange-400/20" },
-    { label: "Completed", value: completed, icon: Award, tone: "from-violet-400/20 to-fuchsia-400/20" },
-    { label: "Internships Applied", value: applied, icon: Briefcase, tone: "from-sky-400/20 to-indigo-400/20" },
+    { label: "Enrolled Courses", value: enrolled, icon: BookOpen, tone: "bg-peach/80 text-orange-foreground" },
+    { label: "In Progress", value: inProgress, icon: Flame, tone: "bg-peach/80 text-orange-foreground" },
+    { label: "Completed", value: completed, icon: Award, tone: "bg-peach/80 text-orange-foreground" },
+    { label: "Internships Applied", value: applied, icon: Briefcase, tone: "bg-peach/80 text-orange-foreground" },
   ];
 
   return (
@@ -124,8 +128,8 @@ function DashboardHome() {
           const Icon = s.icon;
           return (
             <div key={s.label} className="glass-card lift-card rounded-2xl p-5">
-              <div className={`mb-3 inline-grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br ${s.tone}`}>
-                <Icon className="h-5 w-5 text-foreground" />
+              <div className={`mb-3 inline-grid h-10 w-10 place-items-center rounded-xl ${s.tone}`}>
+                <Icon className="h-5 w-5" />
               </div>
               <p className="text-2xl font-extrabold tracking-tight">{s.value}</p>
               <p className="text-xs text-muted-foreground">{s.label}</p>
@@ -153,14 +157,21 @@ function DashboardHome() {
             </div>
           ) : (
             <ul className="space-y-3">
-              {continueCourses.map((c) => (
-                <li
-                  key={c.slug}
-                  className="flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 p-3 transition-colors hover:bg-background"
-                >
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-peach/20 border border-peach/35 text-2xl">
-                    {c.thumbnail}
-                  </div>
+              {continueCourses.map((c) => {
+                const courseData = dbCourses.find((item) => item.slug === c.slug);
+                const courseImage = courseData?.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60";
+                return (
+                  <li
+                    key={c.slug}
+                    className="flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 p-3 transition-colors hover:bg-background"
+                  >
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+                      <img
+                        src={courseImage}
+                        alt={c.title}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{c.title}</p>
                     <p className="truncate text-xs text-muted-foreground">Next: {c.nextLesson}</p>
@@ -174,11 +185,18 @@ function DashboardHome() {
                       <span className="text-xs font-bold text-foreground/90">{c.progress}%</span>
                     </div>
                   </div>
-                  <Button size="sm" variant="outline" className="shrink-0">
-                    Resume
-                  </Button>
+                  <CourseLearningDialog 
+                    enrollment={c}
+                    courseData={courseData}
+                    trigger={
+                      <Button size="sm" variant="outline" className="shrink-0">
+                        Resume
+                      </Button>
+                    }
+                  />
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </div>
@@ -213,16 +231,25 @@ function DashboardHome() {
       </section>
 
       {/* Progress overview */}
-      {enrollments.length > 0 && (
+      {activeEnrollments.length > 0 && (
         <section className="glass-card rounded-2xl p-5">
           <h3 className="mb-4 text-base font-semibold">Progress Overview</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {enrollments.map((c) => (
-              <div key={c.slug} className="rounded-xl border border-border/60 bg-background/60 p-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{c.thumbnail}</span>
-                  <p className="truncate text-sm font-semibold">{c.title}</p>
-                </div>
+            {activeEnrollments.map((c) => {
+              const courseData = dbCourses.find((item) => item.slug === c.slug);
+              const courseImage = courseData?.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60";
+              return (
+                <div key={c.slug} className="rounded-xl border border-border/60 bg-background/60 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                      <img
+                        src={courseImage}
+                        alt={c.title}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <p className="truncate text-sm font-semibold">{c.title}</p>
+                  </div>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
                     <div
@@ -236,7 +263,8 @@ function DashboardHome() {
                   {c.completedLessons} / {c.totalLessons} lessons
                 </p>
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

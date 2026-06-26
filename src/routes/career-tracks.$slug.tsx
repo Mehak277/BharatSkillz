@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, CheckCircle2, Clock, TrendingUp } from "lucide-react";
 import { TRACKS, type Track } from "@/lib/data/tracks";
 import { Button } from "@/components/ui/button";
+import { TrackEnrollDialog } from "@/components/site/TrackEnrollDialog";
 
 const toneBg: Record<Track["tone"], string> = {
   mint: "bg-mint",
@@ -93,8 +94,11 @@ function TrackPage() {
 
         <div className="mt-12 flex flex-col items-center gap-3 rounded-3xl border border-border bg-secondary/40 p-8 text-center">
           <h3 className="text-xl font-bold">Ready to start your {track.title} journey?</h3>
-          <p className="text-sm text-muted-foreground">Talk to a counsellor and get your personalised plan.</p>
-          <Button asChild className="btn-shine mt-2"><Link to="/contact">Talk to a counsellor</Link></Button>
+          <p className="text-sm text-muted-foreground">Enroll now and get your personalised learning plan.</p>
+          <TrackEnrollDialog 
+            track={track}
+            trigger={<Button className="btn-shine mt-2 w-full max-w-sm h-12 text-base">Enroll Now</Button>}
+          />
         </div>
       </div>
     </section>

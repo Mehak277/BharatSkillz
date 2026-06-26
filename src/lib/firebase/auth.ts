@@ -10,6 +10,7 @@ import {
   AuthError,
   GoogleAuthProvider,
   signInWithPopup,
+  updatePassword,
 } from 'firebase/auth';
 import { getFirebaseAuth } from './config';
 
@@ -136,6 +137,23 @@ export const signOut = async (): Promise<void> => {
     const authError = error as AuthError;
     const message = getErrorMessage(authError);
     throw new FirebaseAuthError(authError.code, message, authError);
+  }
+};
+
+/**
+ * Update the current user's password
+ * @param newPassword - New password
+ * @throws FirebaseAuthError if password update fails
+ */
+export const updateUserPassword = async (newPassword: string): Promise<void> => {
+  try {
+    const auth = await getFirebaseAuth();
+    if (!auth.currentUser) throw new Error("No user is currently signed in.");
+    await updatePassword(auth.currentUser, newPassword);
+  } catch (error) {
+    const authError = error as AuthError;
+    const message = getErrorMessage(authError);
+    throw new FirebaseAuthError(authError.code || 'unknown', message, authError);
   }
 };
 

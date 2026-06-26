@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CareerRoadmaps } from "@/components/site/CareerRoadmaps";
 import { PlacementAssistance } from "@/components/site/PlacementAssistance";
 
-export const Route = createFileRoute("/career-tracks")({
+export const Route = createFileRoute("/career-tracks/")({
   head: () => ({
     meta: [
       { title: "Career Tracks — BharatSkillz" },

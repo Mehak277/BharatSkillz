@@ -152,15 +152,26 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html { scroll-behavior: smooth; }
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, h5 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
@@ -173,39 +184,89 @@
   max-width: 80rem;
 }
 
-@utility text-balance { text-wrap: balance; }
+@utility text-balance {
+  text-wrap: balance;
+}
 
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-@keyframes marquee-up {
-  from { transform: translateY(0); }
-  to { transform: translateY(-50%); }
-}
-@keyframes marquee-down {
-  from { transform: translateY(-50%); }
-  to { transform: translateY(0); }
-}
-@keyframes float-y {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
 
-@utility animate-marquee { animation: marquee 35s linear infinite; }
-@utility animate-marquee-up { animation: marquee-up 30s linear infinite; }
-@utility animate-marquee-down { animation: marquee-down 30s linear infinite; }
+@keyframes marquee-up {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes marquee-down {
+  from {
+    transform: translateY(-50%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-y {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee 35s linear infinite;
+}
+
+@utility animate-marquee-up {
+  animation: marquee-up 30s linear infinite;
+}
+
+@utility animate-marquee-down {
+  animation: marquee-down 30s linear infinite;
+}
+
 @utility pause-on-hover {
   &:hover {
     animation-play-state: paused;
   }
 }
-@utility animate-float { animation: float-y 6s ease-in-out infinite; }
-@utility animate-fade-in-up { animation: fade-in-up 0.6s ease-out both; }
+
+@utility animate-float {
+  animation: float-y 6s ease-in-out infinite;
+}
+
+@utility animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
 
 /* ============================================================
    Premium polish: glassmorphism, premium lift, section rhythm
@@ -215,10 +276,12 @@
 @utility section-y {
   padding-top: 3.5rem;
   padding-bottom: 3.5rem;
+
   @media (min-width: 640px) {
     padding-top: 4.5rem;
     padding-bottom: 4.5rem;
   }
+
   @media (min-width: 1024px) {
     padding-top: 5.5rem;
     padding-bottom: 5.5rem;
@@ -242,6 +305,7 @@
     box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.4s ease;
   will-change: transform;
+
   &:hover {
     transform: translateY(-6px);
     box-shadow:
@@ -255,20 +319,22 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
+
   &::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      120deg,
-      transparent 30%,
-      color-mix(in oklab, white 35%, transparent) 50%,
-      transparent 70%
-    );
+    background: linear-gradient(120deg,
+        transparent 30%,
+        color-mix(in oklab, white 35%, transparent) 50%,
+        transparent 70%);
     transform: translateX(-120%);
     transition: transform 0.7s ease;
     pointer-events: none;
     z-index: 1;
   }
-  &:hover::after { transform: translateX(120%); }
+
+  &:hover::after {
+    transform: translateX(120%);
+  }
 }
