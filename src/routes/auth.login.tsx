@@ -156,12 +156,11 @@ function LoginPage() {
               try {
                 const result = await signInWithGoogle();
                 if (result.isNewUser) {
-                  await createUserProfile(result.user.uid, {
-                    name: result.user.displayName || "User",
-                    email: result.user.email || "",
-                    role: "student",
-                    status: "Active",
-                  });
+                  await createUserProfile(
+                    result.user.uid,
+                    result.user.displayName || "User",
+                    result.user.email || ""
+                  );
                   toast.success("Account created successfully!");
                 } else {
                   toast.success("Welcome back!");
