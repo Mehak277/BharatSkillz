@@ -186,10 +186,18 @@ function ProfilePage() {
             <Label htmlFor="phone">Phone</Label>
             <Input
               id="phone"
+              type="tel"
+              inputMode="numeric"
+              maxLength={10}
               value={form.phone}
-              onChange={update("phone")}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  phone: e.target.value.replace(/\D/g, "").slice(0, 10),
+                }))
+              }
               className="mt-1.5"
-              placeholder="+91 00000 00000"
+              placeholder="10-digit mobile number"
             />
           </div>
           <div>

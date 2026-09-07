@@ -32,6 +32,17 @@ export function EnrollDialog({
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [phone, setPhone] = useState("");
+
+  // Sync phone from profile if available
+  const handleOpenChange = (o: boolean) => {
+    setOpen(o);
+    if (!o) {
+      setDone(false);
+    } else if (profile?.phone) {
+      setPhone(profile.phone.replace(/\D/g, "").slice(0, 10));
+    }
+  };
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -84,10 +95,7 @@ export function EnrollDialog({
   return (
     <Dialog
       open={open}
-      onOpenChange={(o) => {
-        setOpen(o);
-        if (!o) setDone(false);
-      }}
+      onOpenChange={handleOpenChange}
     >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -164,8 +172,11 @@ export function EnrollDialog({
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+91 9xxxxxxxxx"
-                  defaultValue={profile?.phone || ""}
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="10-digit mobile number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                   required
                 />
               </div>
