@@ -15,28 +15,14 @@ import {
  * Firebase configuration from VITE environment variables
  */
 const getFirebaseConfig = () => {
-  const config = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  return {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDRKq_f9r1uWQiDYZHFBJAr0mnOrg3x2xU',
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'bharatskillz.firebaseapp.com',
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'bharatskillz',
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'bharatskillz.firebasestorage.app',
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '339468213220',
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:339468213220:web:a47ca5206fc38c875745f1',
   };
-
-  // Validate required environment variables
-  const missingVars = Object.entries(config)
-    .filter(([_, value]) => !value)
-    .map(([key]) => key);
-
-  if (missingVars.length > 0) {
-    throw new Error(
-      `Missing Firebase environment variables: ${missingVars.join(', ')}. ` +
-      'Please ensure all VITE_FIREBASE_* variables are set in your .env file.'
-    );
-  }
-
-  return config;
 };
 
 /**

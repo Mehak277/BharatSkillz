@@ -25,8 +25,11 @@ export const AUTH_ERROR_MESSAGES: Record<string, string> = {
   'auth/wrong-password': 'Incorrect password.',
   'auth/too-many-requests':
     'Too many failed login attempts. Please try again later.',
-  'auth/operation-not-allowed': 'This operation is not allowed.',
+  'auth/operation-not-allowed': 'This operation is not allowed. Please check Firebase Console.',
   'auth/invalid-credential': 'Invalid email or password.',
+  'auth/unauthorized-domain': 'This domain is not authorized in Firebase Console > Authentication > Settings > Authorized domains.',
+  'auth/popup-closed-by-user': 'Google sign-in popup was closed before completing.',
+  'auth/cancelled-popup-request': 'Google sign-in request was cancelled.',
 };
 
 /**
